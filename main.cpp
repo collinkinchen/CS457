@@ -166,12 +166,12 @@ int main(int argc, char* argv[]){
 	char buf[MAXDATASIZE];
 	int tempcount = 0;
 	while (tempcount < 4){
-		char message[100];
+		char message[256];
 		cout << "You: ";
-		cin >> message;
+		cin.getline (message,256);;
 		//cout << "This is what you typed: " << message << endl;
 
-        if (send(new_fd, message, 100, 0) == -1)
+        if (send(new_fd, &message, strlen(message), 0) == -1)
                 perror("send");		
 				
 			sleep(2);
@@ -291,7 +291,12 @@ int main(int argc, char* argv[]){
     printf("client: received '%s'\n",buf);
 	sleep(2);
 	
-	if (send(sockfd, "Hello, world!!!!!", 17, 0) == -1)
+		char message[256];
+		cout << "You: ";
+		cin.getline (message,256);;
+
+	
+	if (send(sockfd, &message, strlen(message), 0) == -1)
         perror("send");
 	tempcount++;
 	}//end while for sending/reciving
