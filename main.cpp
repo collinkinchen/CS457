@@ -153,8 +153,10 @@ int main(int argc, char* argv[]){
         perror("sigaction");
         exit(1);
     }
-
-    printf("server: waiting for connections...\n");
+	printf("Welcome to Chat!\n");
+    printf("Waiting for connections on...\n");
+    printf("%d port 3490\n", hints.ai_flags);
+	
 	//cout << "IP: " << hints.ai_flags << endl;
 	//cout << "PORT: " << PORT << endl;
     while(1) {  // main accept() loop
@@ -168,17 +170,31 @@ int main(int argc, char* argv[]){
         inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
-        printf("server: got connection from %s\n", s);
+        printf("Found a friend! got connection from %s\n", s);
+        printf("You recieve first.\n");
 	int numbytes;
-	char buf[MAXDATASIZE];
+	//char buf[MAXDATASIZE];
 	int tempcount = 0;
 	while (tempcount < 4){
+		struct build packet;
+	if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
+		perror("recv");
+
+    }
+
+    //buf[numbytes] = '\0';
+
+    printf("Friend: '%s'\n",packet.messageText);
+		
+		struct build temp;
+		packet = temp;
+
 		char message[256];
 		cout << "You: ";
 		cin.getline (message,256);
 	
-	struct build packet;
-	packet.versionNum = htons(457);
+	//struct build packet;
+	packet.versionNum = 457;//might need to be htons(457)
 	packet.messageLenght = strlen(message);
 	//packet.messageText = message;
 	stpcpy(packet.messageText,message);
@@ -198,60 +214,29 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-		
-		//build outgoingMessage = s1.pack(message,version);
-		//cout << "This is what you typed: " << message << endl;
-
         if (send(new_fd, &packet, sizeof (packet), 0) == -1)
                 perror("send");		
 
-			sleep(2);
-			struct build temp;
-			packet = temp;
+			//sleep(2);
+			// struct build temp;
+			// packet = temp;
         
-			if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
-			perror("recv");
+			// if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
+			// perror("recv");
 
-    }
+    // }
 
-    buf[numbytes] = '\0';
+    // buf[numbytes] = '\0';
 
-    printf("Server: received '%s'\n",packet.messageText);
+    // printf("Server: received '%s'\n",packet.messageText);
+    //printf("Server: received '%d'\n",packet.messageLenght);
+    //printf("Server: received '%d'\n",packet.versionNum);
+	
 	tempcount++;
 	}
         close(new_fd);  // parent doesn't need this
     
 	}
-
-	
-	
-	
-			// socket() create socket
-//			int newSocket = socket(PF_INET,SOCK_STREAM,0);
-//			if (newSocket < 0){return errorMessage(6);}
-//			// cout << newSocket << endl;
-//			// bind()
-//			struct sockaddr_in ServAddr;
-//			ServAddr.sin_family = AF_INET; /* Internet address family */
-//			ServAddr.sin_addr.s_addr = htonl(INADDR_ANY); /* Any incoming interface ServAddr.*/
-//			cout << "IP: " << htonl(INADDR_ANY) << endl;
-//			ServAddr.sin_port = htons(MYPORT); /* Local port ###JUST GIVEN RANDOM AT THE MOMENT###*/
-//			int testBind = bind(newSocket,(struct sockaddr *)&ServAddr, sizeof(ServAddr));
-//			if (testBind < 0){return errorMessage(6);}
-//			// listen()
-//			#define MAXPENDING 5
-//			int testListen = listen(newSocket,MAXPENDING);
-//			cout << testListen << endl;
-//			if (testBind < 0){return errorMessage(6);}
-//			// accept()
-//			struct sockaddr_storage their_addr;
-//			socklen_t addr_size ;
-//			
-//			addr_size = sizeof their_addr;
-//			//cout << "OPEN ON ADDRESS: " << ServAddr.sin_addr.s_addr << endl;//
-//
-//			int testAccept = accept(newSocket, (sockaddr *) &their_addr, &addr_size);
-//			cout << "TEST ACCEPT" << testAccept << endl;
 
 	}
 	else{//handle 5
@@ -259,23 +244,25 @@ int main(int argc, char* argv[]){
 		string arg3 = argv[3];
 		if ((arg1 == "-p" || arg1 == "-s")){
 			if ((arg3 == "-p" || arg3 == "-s")){ //check to make sure only getting -s or -p commands
-				string arg2 = argv[2];
-				string arg4 = argv[4];
+				char* arg2 = argv[2];
+				char* arg4 = argv[4];
 				// int portStatus = validPort(argv[2]);
 				int portStatus;
 				int ipStatus;
-				if (arg1 == "-p"){portStatus = s1.validPort(arg2);}
-				if (arg3 == "-p"){portStatus = s1.validPort(arg4);}
+				string ip;
+				char* port;
+				if (arg1 == "-p"){portStatus = s1.validPort(arg2);port = arg2;}
+				if (arg3 == "-p"){portStatus = s1.validPort(arg4);port = arg4;}
 				if (portStatus == 4){return errorMessage(4);}
-				if (arg1 == "-s"){ipStatus = s1.validIP(arg2);}
-				if (arg3 == "-s"){ipStatus = s1.validIP(arg4);}
+				if (arg1 == "-s"){ipStatus = s1.validIP(arg2);ip = arg2;}
+				if (arg3 == "-s"){ipStatus = s1.validIP(arg4);ip = arg4;}
 				if (ipStatus == 5){return errorMessage(5);}
 				//cout << "made it here" << endl;
 				int newSocket = socket(PF_INET,SOCK_STREAM,0);
 				if (newSocket < 0){return errorMessage(6);}
 				
 	int sockfd, numbytes;  
-    char buf[MAXDATASIZE];
+    //char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -284,7 +271,7 @@ int main(int argc, char* argv[]){
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(INADDR_ANY, PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(INADDR_ANY, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -318,23 +305,17 @@ int main(int argc, char* argv[]){
 	struct build recieveData;
 
     while( tempcount < 4){//start while for sending/reciving
-	if ((numbytes = recv(sockfd, &recieveData, sizeof (recieveData), 0)) == -1) {
-        perror("recv");
-    }
-    buf[numbytes] = '\0';
-    printf("client: received '%s'\n",recieveData.messageText);
-	sleep(2);
-	
+
 		char message[256];
 		cout << "You: ";
 		cin.getline (message,256);
-		s1.pack(message,version);
+		//s1.pack(message,version);
 
-		struct build packet;
-	packet.versionNum = htons(457);
-	packet.messageLenght = strlen(message);
+		struct build clientPacket;
+	clientPacket.versionNum = 457; //might need to be htons(457)
+	clientPacket.messageLenght = strlen(message);
 	//packet.messageText = message;
-	stpcpy(packet.messageText,message);
+	stpcpy(clientPacket.messageText,message);
 		
 		bool loop = true;
 	if (strlen(message) > 140){
@@ -344,16 +325,25 @@ int main(int argc, char* argv[]){
 		cin.getline (message,256);
 		if (strlen(message) <= 140){
 			//packet.messageText = message;
-			stpcpy(packet.messageText,message);
-			packet.messageLenght = strlen(message);
+			stpcpy(clientPacket.messageText,message);
+			clientPacket.messageLenght = strlen(message);
 			loop = false;
 		}
 		}
 	}
 
 	
-	if (send(sockfd, &packet, sizeof(packet), 0) == -1)
+	if (send(sockfd, &clientPacket, sizeof(clientPacket), 0) == -1)
         perror("send");
+	
+	if ((numbytes = recv(sockfd, &recieveData, sizeof (recieveData), 0)) == -1) {
+        perror("recv");
+    }
+    //buf[numbytes] = '\0';
+    printf("Friend: '%s'\n",recieveData.messageText);
+	//sleep(2);
+	
+	
 	tempcount++;
 	}//end while for sending/reciving
     close(sockfd);
