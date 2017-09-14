@@ -23,6 +23,7 @@ using std::cin;
 #define PORT "3490"
 #define BACKLOG 10
 #define MAXDATASIZE 100
+int version = 457;
 //struct sockaddr_in{
 //unsigned short sin_family;/* Internet protocol (AF_INET) */
 //unsigned short sin_port;  /* Address port (16 bits) */
@@ -168,12 +169,13 @@ int main(int argc, char* argv[]){
 	while (tempcount < 4){
 		char message[256];
 		cout << "You: ";
-		cin.getline (message,256);;
+		cin.getline (message,256);
+		s1.pack(message,version);
 		//cout << "This is what you typed: " << message << endl;
 
         if (send(new_fd, &message, strlen(message), 0) == -1)
                 perror("send");		
-				
+
 			sleep(2);
         
 			if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
@@ -293,7 +295,10 @@ int main(int argc, char* argv[]){
 	
 		char message[256];
 		cout << "You: ";
-		cin.getline (message,256);;
+		cin.getline (message,256);
+		s1.pack(message,version);
+
+		//cout << "MESSAGE LENGTH: " << strlen(message) << endl;
 
 	
 	if (send(sockfd, &message, strlen(message), 0) == -1)
