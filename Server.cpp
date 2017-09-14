@@ -41,19 +41,23 @@ int Server::validIP(string ipAddr){
 }
 
 char* Server::pack(char* message, int version){
-	int messageLen = strlen(message);
-	cout << "MESSAGE: "  << message << endl;
-	cout << "MESSAGE LENGTH: "  << messageLen << endl;
-	cout << "VERSION: " << version << endl;
+	//build packet;
+	//packet.versionNum = htons(457);
+	//packet.messageLenght = strlen(message);
+	//packet.messageText = message;
+	//int messageLen = strlen(message);
+	//cout << "MESSAGE: "  << message << endl;
+	//cout << "MESSAGE LENGTH: "  << messageLen << endl;
+	//cout << "VERSION: " << version << endl;
 	//cout << "VERSION in hex: " <<  << endl;
 	// unsigned char test[16];
 	// unsigned char *buffer = test;
 	// unsigned int i;
 	// *buffer++ = version>>i;
 	// *buffer++ = i;
-	bitset<8> version;
-	version.set();
-	cout << "version in hex: " << version << endl;
+	//bitset<8> version;
+	//version.set();
+	//cout << "version in hex: " << version << endl;
 	//cout << "VERSION in htons: " << htons(htons(version)) << endl;
 	bool loop = true;
 	if (strlen(message) > 140){
@@ -62,6 +66,8 @@ char* Server::pack(char* message, int version){
 		cout << "You: ";
 		cin.getline (message,256);
 		if (strlen(message) <= 140){
+			//packet.messageText = message;
+			//packet.messageLenght = strlen(message);
 			loop = false;
 		}
 		}

@@ -30,6 +30,12 @@ int version = 457;
 //struct in_addr sin_addr; /* Internet address (32 bits) */
 //char sin_zero[8];       /* Not used */
 //}
+struct build{
+		short versionNum;
+		short messageLenght;
+		char messageText[256];
+	};
+
 
 void sigchld_handler(int s)
 {
@@ -170,22 +176,47 @@ int main(int argc, char* argv[]){
 		char message[256];
 		cout << "You: ";
 		cin.getline (message,256);
-		s1.pack(message,version);
+	
+	struct build packet;
+	packet.versionNum = htons(457);
+	packet.messageLenght = strlen(message);
+	//packet.messageText = message;
+	stpcpy(packet.messageText,message);
+		
+		bool loop = true;
+	if (strlen(message) > 140){
+		while(loop){
+		cout << "Message not sent: length exceeds 140 characters" << endl;
+		cout << "You: ";
+		cin.getline (message,256);
+		if (strlen(message) <= 140){
+			//packet.messageText = message;
+			stpcpy(packet.messageText,message);
+			packet.messageLenght = strlen(message);
+			loop = false;
+		}
+		}
+	}
+
+		
+		//build outgoingMessage = s1.pack(message,version);
 		//cout << "This is what you typed: " << message << endl;
 
-        if (send(new_fd, &message, strlen(message), 0) == -1)
+        if (send(new_fd, &packet, sizeof (packet), 0) == -1)
                 perror("send");		
 
 			sleep(2);
+			struct build temp;
+			packet = temp;
         
-			if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1) {
+			if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
 			perror("recv");
 
     }
 
     buf[numbytes] = '\0';
 
-    printf("Server: received '%s'\n",buf);
+    printf("Server: received '%s'\n",packet.messageText);
 	tempcount++;
 	}
         close(new_fd);  // parent doesn't need this
@@ -257,7 +288,6 @@ int main(int argc, char* argv[]){
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
@@ -285,12 +315,14 @@ int main(int argc, char* argv[]){
 
     freeaddrinfo(servinfo); // all done with this structure
 	int tempcount = 0;
+	struct build recieveData;
+
     while( tempcount < 4){//start while for sending/reciving
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+	if ((numbytes = recv(sockfd, &recieveData, sizeof (recieveData), 0)) == -1) {
         perror("recv");
     }
     buf[numbytes] = '\0';
-    printf("client: received '%s'\n",buf);
+    printf("client: received '%s'\n",recieveData.messageText);
 	sleep(2);
 	
 		char message[256];
@@ -298,10 +330,29 @@ int main(int argc, char* argv[]){
 		cin.getline (message,256);
 		s1.pack(message,version);
 
-		//cout << "MESSAGE LENGTH: " << strlen(message) << endl;
+		struct build packet;
+	packet.versionNum = htons(457);
+	packet.messageLenght = strlen(message);
+	//packet.messageText = message;
+	stpcpy(packet.messageText,message);
+		
+		bool loop = true;
+	if (strlen(message) > 140){
+		while(loop){
+		cout << "Message not sent: length exceeds 140 characters" << endl;
+		cout << "You: ";
+		cin.getline (message,256);
+		if (strlen(message) <= 140){
+			//packet.messageText = message;
+			stpcpy(packet.messageText,message);
+			packet.messageLenght = strlen(message);
+			loop = false;
+		}
+		}
+	}
 
 	
-	if (send(sockfd, &message, strlen(message), 0) == -1)
+	if (send(sockfd, &packet, sizeof(packet), 0) == -1)
         perror("send");
 	tempcount++;
 	}//end while for sending/reciving

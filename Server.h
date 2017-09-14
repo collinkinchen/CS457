@@ -24,6 +24,14 @@ using std::cin;
 using std::bitset;
 
 class Server{
+struct build{
+		int versionNum;
+		int messageLenght;
+		char* messageText;
+	};
+	
+	
+	
 public:
 void printStuff();
 int validPort(string portNum);
