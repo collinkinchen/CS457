@@ -1,0 +1,14 @@
+How run the program:
+ -Server ./chat
+ -Client ./chat -s <IP address> -p <port number>
+ 
+ You must start the server first. The server will display the IP address and Port
+ that it wants you to connect to 
+ 
+ 
+ Questions asked:
+ -Can I hard code the port as long as it is above 1024 - YES
+ 
+ Created by: Collin Kinchen
+ Made For: CS457 Fall 2017 P1C
+ Date: 9/14/2017
