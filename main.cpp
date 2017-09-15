@@ -33,7 +33,7 @@ int version = 457;
 struct build{
 		short versionNum;
 		short messageLenght;
-		char messageText[256];
+		char messageText[140];
 	};
 
 
@@ -90,9 +90,15 @@ int main(int argc, char* argv[]){
     hints.ai_flags = AI_PASSIVE; // use my IP
 
 	
-	//cout << "MY IP: " << hints.ai_flags << endl;
+	//cout << "MY IP: " << getbyhostname(hints.ai_flags) << endl;
+	// char hostname[256];
+	// gethostname(hostname,256);
+	// cout << "Hostname: " << hostname << endl;
+	// cout << "IP: " << gethostbyname(hostname) << endl;
 	
+	//##########################################################
 	
+	//##########################################################
 	Server s1;
 	//s1.printStuff();
 	// int portStatus = s1.validPort(argv[2]);
@@ -104,6 +110,7 @@ int main(int argc, char* argv[]){
 		}else{return errorMessage(2);}
 	}
 	else if (argc == 1){ //handle 1
+	
 	
 		if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -129,7 +136,7 @@ int main(int argc, char* argv[]){
             perror("server: bind");
             continue;
         }
-		//cout << "IP: " << p->ai_addr << endl;
+		//cout << "IP: " << &p->ai_addr << endl;
 
         break;
     }
@@ -153,9 +160,15 @@ int main(int argc, char* argv[]){
         perror("sigaction");
         exit(1);
     }
+	struct hostent *he;
+	struct in_addr **addr_list;
+	char hostname[256];
+	gethostname(hostname,256);
+	he = gethostbyname(hostname);
+	addr_list = (struct in_addr **)he->h_addr_list;
 	printf("Welcome to Chat!\n");
     printf("Waiting for connections on...\n");
-    printf("%d port 3490\n", hints.ai_flags);
+    printf("%s port 3490\n", inet_ntoa(*addr_list[0]));
 	
 	//cout << "IP: " << hints.ai_flags << endl;
 	//cout << "PORT: " << PORT << endl;
@@ -174,8 +187,8 @@ int main(int argc, char* argv[]){
         printf("You recieve first.\n");
 	int numbytes;
 	//char buf[MAXDATASIZE];
-	int tempcount = 0;
-	while (tempcount < 4){
+	//int tempcount = 0;
+	while (true){
 		struct build packet;
 	if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
 		perror("recv");
@@ -184,7 +197,7 @@ int main(int argc, char* argv[]){
 
     //buf[numbytes] = '\0';
 
-    printf("Friend: '%s'\n",packet.messageText);
+    printf("Friend: %s\n",packet.messageText);
 		
 		struct build temp;
 		packet = temp;
@@ -192,12 +205,12 @@ int main(int argc, char* argv[]){
 		char message[256];
 		cout << "You: ";
 		cin.getline (message,256);
-	
+		char modMessage[140];
 	//struct build packet;
-	packet.versionNum = 457;//might need to be htons(457)
-	packet.messageLenght = strlen(message);
+	//packet.versionNum = 457;//might need to be htons(457)
+	//packet.messageLenght = strlen(message);
 	//packet.messageText = message;
-	stpcpy(packet.messageText,message);
+	//stpcpy(packet.messageText,message);
 		
 		bool loop = true;
 	if (strlen(message) > 140){
@@ -207,32 +220,26 @@ int main(int argc, char* argv[]){
 		cin.getline (message,256);
 		if (strlen(message) <= 140){
 			//packet.messageText = message;
-			stpcpy(packet.messageText,message);
-			packet.messageLenght = strlen(message);
+			stpcpy(modMessage,message);
+			stpcpy(packet.messageText,modMessage);
+			packet.versionNum = htons(457);
+			packet.messageLenght = htons(strlen(modMessage));
 			loop = false;
 		}
 		}
 	}
+	else{//handle
+	stpcpy(modMessage,message);
+	packet.versionNum = htons(457); //might need to be htons(457)
+	packet.messageLenght = htons(strlen(modMessage));
+	stpcpy(packet.messageText,modMessage);
+	}
+
 
         if (send(new_fd, &packet, sizeof (packet), 0) == -1)
                 perror("send");		
-
-			//sleep(2);
-			// struct build temp;
-			// packet = temp;
-        
-			// if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
-			// perror("recv");
-
-    // }
-
-    // buf[numbytes] = '\0';
-
-    // printf("Server: received '%s'\n",packet.messageText);
-    //printf("Server: received '%d'\n",packet.messageLenght);
-    //printf("Server: received '%d'\n",packet.versionNum);
 	
-	tempcount++;
+	//tempcount++;
 	}
         close(new_fd);  // parent doesn't need this
     
@@ -249,7 +256,7 @@ int main(int argc, char* argv[]){
 				// int portStatus = validPort(argv[2]);
 				int portStatus;
 				int ipStatus;
-				string ip;
+				char* ip;
 				char* port;
 				if (arg1 == "-p"){portStatus = s1.validPort(arg2);port = arg2;}
 				if (arg3 == "-p"){portStatus = s1.validPort(arg4);port = arg4;}
@@ -271,7 +278,7 @@ int main(int argc, char* argv[]){
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(INADDR_ANY, port, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(ip, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -301,21 +308,22 @@ int main(int argc, char* argv[]){
     printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
-	int tempcount = 0;
+	//int tempcount = 0;
 	struct build recieveData;
 
-    while( tempcount < 4){//start while for sending/reciving
+    while(true){//start while for sending/reciving
 
 		char message[256];
 		cout << "You: ";
 		cin.getline (message,256);
+		char modMessage[140];
+		//stpcpy(modMessage,message);
 		//s1.pack(message,version);
 
 		struct build clientPacket;
-	clientPacket.versionNum = 457; //might need to be htons(457)
-	clientPacket.messageLenght = strlen(message);
-	//packet.messageText = message;
-	stpcpy(clientPacket.messageText,message);
+	// clientPacket.versionNum = htons(457); //might need to be htons(457)
+	// clientPacket.messageLenght = htons(strlen(message));
+	//stpcpy(clientPacket.messageText,message);
 		
 		bool loop = true;
 	if (strlen(message) > 140){
@@ -324,15 +332,28 @@ int main(int argc, char* argv[]){
 		cout << "You: ";
 		cin.getline (message,256);
 		if (strlen(message) <= 140){
-			//packet.messageText = message;
-			stpcpy(clientPacket.messageText,message);
-			clientPacket.messageLenght = strlen(message);
+			stpcpy(modMessage,message);
+			stpcpy(clientPacket.messageText,modMessage);
+			clientPacket.versionNum = htons(457);
+			clientPacket.messageLenght = htons(strlen(modMessage));
 			loop = false;
 		}
 		}
 	}
-
-	
+	else{//handle
+	stpcpy(modMessage,message);
+	clientPacket.versionNum = htons(457); //might need to be htons(457)
+	clientPacket.messageLenght = htons(strlen(modMessage));
+	stpcpy(clientPacket.messageText,modMessage);
+	}
+	//cout << "SIZE OF MESSAGE: " << strlen(message) << endl;
+	// cout << "SIZE OF STRUCT: " << sizeof(clientPacket) << endl;
+	// cout << "SIZE OF version: " << sizeof(clientPacket.versionNum) << endl;
+	// cout << "version: " << clientPacket.versionNum << endl;
+	// cout << "SIZE OF length: " << sizeof(clientPacket.messageLenght) << endl;
+	// cout << "length: " << clientPacket.messageLenght << endl;
+	// cout << "SIZE OF text: " << sizeof(clientPacket.messageText) << endl;
+	// cout << "text: '" << clientPacket.messageText << "'"<<endl;
 	if (send(sockfd, &clientPacket, sizeof(clientPacket), 0) == -1)
         perror("send");
 	
@@ -340,23 +361,13 @@ int main(int argc, char* argv[]){
         perror("recv");
     }
     //buf[numbytes] = '\0';
-    printf("Friend: '%s'\n",recieveData.messageText);
+    printf("Friend: %s\n",recieveData.messageText);
 	//sleep(2);
 	
 	
-	tempcount++;
+	//tempcount++;
 	}//end while for sending/reciving
     close(sockfd);
-
-				// struct sockaddr_in server_addr;
-				// int client=socket(AF_INET,SOCK_STREAM,0);
-				// if (client < 0){return errorMessage(6);}
-				// server_addr.sin_family=AF_INET;
-				// server_addr.sin_addr.s_addr = inet_addr(IP);
-				// server_addr.sin_port=htons(8080);
-				// if (connect(client,(struct sockaddr *)&server_addr, sizeof(server_addr)) == 0){
-        // cout << "=> Connection to the server " << inet_ntoa(server_addr.sin_addr) << " with port number: 8080" << endl;
-					// }	
 				}
 			else{return errorMessage(3);}
 			}
@@ -365,7 +376,7 @@ int main(int argc, char* argv[]){
 	}
 	else{return errorMessage(1);}
 	
-	cout << "ALL IS GOOD" << endl;	
+	//cout << "ALL IS GOOD" << endl;	
 	return 0;
 
 	
