@@ -9,4 +9,4 @@ clean:
 	rm *.o chat
 	
 tar:
-	tar -cvf chat.tar *.cpp *.h Makefile
+	tar -cvf KinchenChat.tar *.cpp *.h Makefile README

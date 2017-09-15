@@ -88,20 +88,7 @@ int main(int argc, char* argv[]){
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
-
-	
-	//cout << "MY IP: " << getbyhostname(hints.ai_flags) << endl;
-	// char hostname[256];
-	// gethostname(hostname,256);
-	// cout << "Hostname: " << hostname << endl;
-	// cout << "IP: " << gethostbyname(hostname) << endl;
-	
-	//##########################################################
-	
-	//##########################################################
 	Server s1;
-	//s1.printStuff();
-	// int portStatus = s1.validPort(argv[2]);
 	if (argc == 1 || argc == 2 || argc == 5){
 	if (argc == 2){
 		string helpCheck = argv[1];
@@ -168,8 +155,6 @@ int main(int argc, char* argv[]){
     printf("Waiting for connections on...\n");
     printf("%s port %s\n", inet_ntoa(*addr_list[0]),PORT);
 	
-	//cout << "IP: " << hints.ai_flags << endl;
-	//cout << "PORT: " << PORT << endl;
     while(1) {  // main accept() loop
         sin_size = sizeof their_addr;
         new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
@@ -184,16 +169,13 @@ int main(int argc, char* argv[]){
         printf("Found a friend! got connection from %s\n", s);
         printf("You recieve first.\n");
 	int numbytes;
-	//char buf[MAXDATASIZE];
-	//int tempcount = 0;
+
 	while (true){
 		struct build packet;
 	if ((numbytes = recv(new_fd, &packet, sizeof (packet), 0)) == -1) {
 		perror("recv");
 
     }
-
-    //buf[numbytes] = '\0';
 
     printf("Friend: %s\n",packet.messageText);
 		
@@ -204,11 +186,6 @@ int main(int argc, char* argv[]){
 		cout << "You: ";
 		cin.getline (message,256);
 		char modMessage[140];
-	//struct build packet;
-	//packet.versionNum = 457;//might need to be htons(457)
-	//packet.messageLenght = strlen(message);
-	//packet.messageText = message;
-	//stpcpy(packet.messageText,message);
 		
 		bool loop = true;
 	if (strlen(message) > 140){
@@ -217,7 +194,6 @@ int main(int argc, char* argv[]){
 		cout << "You: ";
 		cin.getline (message,256);
 		if (strlen(message) <= 140){
-			//packet.messageText = message;
 			stpcpy(modMessage,message);
 			stpcpy(packet.messageText,modMessage);
 			packet.versionNum = htons(457);
@@ -251,7 +227,6 @@ int main(int argc, char* argv[]){
 			if ((arg3 == "-p" || arg3 == "-s")){ //check to make sure only getting -s or -p commands
 				char* arg2 = argv[2];
 				char* arg4 = argv[4];
-				// int portStatus = validPort(argv[2]);
 				int portStatus;
 				int ipStatus;
 				char* ip;
@@ -262,12 +237,10 @@ int main(int argc, char* argv[]){
 				if (arg1 == "-s"){ipStatus = s1.validIP(arg2);ip = arg2;}
 				if (arg3 == "-s"){ipStatus = s1.validIP(arg4);ip = arg4;}
 				if (ipStatus == 5){return errorMessage(5);}
-				//cout << "made it here" << endl;
 				int newSocket = socket(PF_INET,SOCK_STREAM,0);
 				if (newSocket < 0){return errorMessage(6);}
 				
 	int sockfd, numbytes;  
-    //char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -306,7 +279,6 @@ int main(int argc, char* argv[]){
     printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo);
-	//int tempcount = 0;
 	struct build recieveData;
 
     while(true){//start while for sending/reciving
@@ -338,14 +310,6 @@ int main(int argc, char* argv[]){
 	clientPacket.messageLenght = htons(strlen(modMessage));
 	stpcpy(clientPacket.messageText,modMessage);
 	}
-	//cout << "SIZE OF MESSAGE: " << strlen(message) << endl;
-	// cout << "SIZE OF STRUCT: " << sizeof(clientPacket) << endl;
-	// cout << "SIZE OF version: " << sizeof(clientPacket.versionNum) << endl;
-	// cout << "version: " << clientPacket.versionNum << endl;
-	// cout << "SIZE OF length: " << sizeof(clientPacket.messageLenght) << endl;
-	// cout << "length: " << clientPacket.messageLenght << endl;
-	// cout << "SIZE OF text: " << sizeof(clientPacket.messageText) << endl;
-	// cout << "text: '" << clientPacket.messageText << "'"<<endl;
 	if (send(sockfd, &clientPacket, sizeof(clientPacket), 0) == -1)
         perror("send");
 	
