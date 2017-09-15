@@ -20,7 +20,7 @@ using std::ifstream;
 using std::cerr;
 using std::string;
 using std::cin;
-#define PORT "3490"
+#define PORT "44444"
 #define BACKLOG 10
 #define MAXDATASIZE 100
 int version = 457;
@@ -136,8 +136,6 @@ int main(int argc, char* argv[]){
             perror("server: bind");
             continue;
         }
-		//cout << "IP: " << &p->ai_addr << endl;
-
         break;
     }
 
@@ -168,7 +166,7 @@ int main(int argc, char* argv[]){
 	addr_list = (struct in_addr **)he->h_addr_list;
 	printf("Welcome to Chat!\n");
     printf("Waiting for connections on...\n");
-    printf("%s port 3490\n", inet_ntoa(*addr_list[0]));
+    printf("%s port %s\n", inet_ntoa(*addr_list[0]),PORT);
 	
 	//cout << "IP: " << hints.ai_flags << endl;
 	//cout << "PORT: " << PORT << endl;
@@ -307,7 +305,7 @@ int main(int argc, char* argv[]){
             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-    freeaddrinfo(servinfo); // all done with this structure
+    freeaddrinfo(servinfo);
 	//int tempcount = 0;
 	struct build recieveData;
 
@@ -317,13 +315,7 @@ int main(int argc, char* argv[]){
 		cout << "You: ";
 		cin.getline (message,256);
 		char modMessage[140];
-		//stpcpy(modMessage,message);
-		//s1.pack(message,version);
-
 		struct build clientPacket;
-	// clientPacket.versionNum = htons(457); //might need to be htons(457)
-	// clientPacket.messageLenght = htons(strlen(message));
-	//stpcpy(clientPacket.messageText,message);
 		
 		bool loop = true;
 	if (strlen(message) > 140){
@@ -360,12 +352,7 @@ int main(int argc, char* argv[]){
 	if ((numbytes = recv(sockfd, &recieveData, sizeof (recieveData), 0)) == -1) {
         perror("recv");
     }
-    //buf[numbytes] = '\0';
     printf("Friend: %s\n",recieveData.messageText);
-	//sleep(2);
-	
-	
-	//tempcount++;
 	}//end while for sending/reciving
     close(sockfd);
 				}
@@ -376,7 +363,6 @@ int main(int argc, char* argv[]){
 	}
 	else{return errorMessage(1);}
 	
-	//cout << "ALL IS GOOD" << endl;	
 	return 0;
 
 	
